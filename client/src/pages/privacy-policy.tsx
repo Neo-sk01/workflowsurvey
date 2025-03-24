@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { Footer } from "../components/Footer";
 
 const PrivacyPolicy: React.FC = () => {
   const [, navigate] = useLocation();
@@ -12,21 +13,24 @@ const PrivacyPolicy: React.FC = () => {
       <header className="bg-white shadow-sm py-4 px-6">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center">
-            <Logo size="medium" className="text-primary" />
+            <a href="/" className="hover:opacity-80 transition-opacity">
+              <Logo size="medium" className="text-primary" />
+            </a>
+          </div>
+          <div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/")}
+              className="text-neutral-600 border-neutral-300 hover:bg-neutral-100"
+            >
+              Back to Home
+            </Button>
           </div>
         </div>
       </header>
 
       <main className="flex-grow container mx-auto px-4 py-12 max-w-3xl">
-        <Button 
-          variant="ghost" 
-          className="mb-8 flex items-center"
-          onClick={() => navigate("/")}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Home
-        </Button>
-        
         <div className="bg-white rounded-xl shadow-md p-8">
           <h1 className="text-3xl font-bold text-neutral-900 mb-6">Privacy Policy</h1>
           <p className="text-neutral-600 mb-6">
@@ -111,27 +115,7 @@ const PrivacyPolicy: React.FC = () => {
         </div>
       </main>
 
-      <footer className="bg-neutral-900 text-neutral-400 py-6 px-6">
-        <div className="container mx-auto max-w-4xl flex flex-col md:flex-row justify-between items-center text-sm">
-          <div className="mb-4 md:mb-0">
-            <Logo size="small" className="text-white" />
-          </div>
-          <div className="flex space-x-6">
-            <a href="/privacy-policy" className="hover:text-white transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Terms of Service
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Contact Us
-            </a>
-          </div>
-          <div className="mt-4 md:mt-0">
-            © 2025 Carbo Software. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

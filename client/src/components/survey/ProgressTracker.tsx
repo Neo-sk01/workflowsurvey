@@ -10,11 +10,12 @@ interface ProgressTrackerProps {
 }
 
 const sectionLabels = [
-  "Current Tasks",
-  "System Integration",
-  "Growth Potential",
-  "Digital Readiness",
-  "ROI Assessment",
+  "Current Tools & Daily Tasks",
+  "Repetitive Tasks & Daily Operations",
+  "Systems Integration & Data Management",
+  "Business Growth & Scalability",
+  "Process Clarity & Digital Readiness",
+  "Strategic Focus & ROI Potential"
 ];
 
 const sectionIcons = [
@@ -22,7 +23,8 @@ const sectionIcons = [
   "🔄", // rotating arrows for integration
   "📈", // chart with upward trend for growth
   "💻", // computer for digital readiness
-  "💰", // money bag for ROI
+  "📊", // chart for process clarity
+  "💰"  // money bag for ROI
 ];
 
 const ProgressTracker: React.FC<ProgressTrackerProps> = ({
@@ -67,7 +69,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
 
       <div className="relative mt-8 mb-2">
         <div className="absolute h-0.5 bg-neutral-200 top-5 left-0 right-0 z-0" />
-        <div className="grid grid-cols-5 gap-1 relative z-10">
+        <div className="grid grid-cols-6 gap-1 relative z-10">
           {Array.from({ length: totalSections }).map((_, index) => {
             const sectionNumber = index + 1;
             const isActive = sectionNumber === currentSection;

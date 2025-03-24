@@ -10,6 +10,7 @@ interface TextInputProps {
   placeholder?: string;
   label?: string;
   maxLength?: number;
+  required?: boolean;
 }
 
 const TextInput: React.FC<TextInputProps> = ({
@@ -18,6 +19,7 @@ const TextInput: React.FC<TextInputProps> = ({
   placeholder = "Please provide additional details...",
   label = "Additional comments",
   maxLength = 500,
+  required = false,
 }) => {
   const { control } = useFormContext();
   const [charCount, setCharCount] = useState(0);
@@ -25,8 +27,9 @@ const TextInput: React.FC<TextInputProps> = ({
   return (
     <Controller
       control={control}
-      name={`${name}_text`}
-      render={({ field }) => (
+      name={name.endsWith('_text') ? name : `${name}_text`}
+      rules={{ required }}
+      render={({ field, fieldState }) => (
         <motion.div 
           className="mt-6 p-4 border border-neutral-200 rounded-lg bg-neutral-50"
           initial={{ opacity: 0, y: 10 }}
@@ -36,7 +39,7 @@ const TextInput: React.FC<TextInputProps> = ({
           <div className="flex items-center mb-2">
             <MessageSquare className="w-4 h-4 text-neutral-500 mr-2" />
             <label htmlFor={`${id}-text`} className="text-sm font-medium text-neutral-700">
-              {label}
+              {label} {required && <span className="text-red-500">*</span>}
             </label>
           </div>
           
@@ -44,6 +47,7 @@ const TextInput: React.FC<TextInputProps> = ({
             id={`${id}-text`}
             className={cn(
               "w-full p-3 min-h-[100px] border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all bg-white resize-none",
+              fieldState.invalid && "border-red-300 focus:border-red-500 focus:ring-red-200"
             )}
             placeholder={placeholder}
             maxLength={maxLength}
@@ -55,7 +59,10 @@ const TextInput: React.FC<TextInputProps> = ({
             onBlur={field.onBlur}
           />
           
-          <div className="flex justify-end mt-1">
+          <div className="flex justify-between mt-1">
+            {fieldState.invalid && (
+              <span className="text-xs text-red-500">This field is required</span>
+            )}
             <span className={cn(
               "text-xs",
               charCount > maxLength * 0.8 ? "text-amber-500" : "text-neutral-500",

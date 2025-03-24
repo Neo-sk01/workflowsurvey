@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import Logo from "@/components/Logo";
 import { motion } from "framer-motion";
 import { ArrowRight, CheckCircle } from "lucide-react";
+import { Footer } from "../components/Footer";
 
 const Home: React.FC = () => {
   const [, navigate] = useLocation();
@@ -22,7 +23,19 @@ const Home: React.FC = () => {
       <header className="bg-white shadow-sm py-4 px-6">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center">
-            <Logo size="medium" className="text-primary" />
+            <a href="/" className="hover:opacity-80 transition-opacity">
+              <Logo size="medium" className="text-primary" />
+            </a>
+          </div>
+          <div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/")}
+              className="text-neutral-600 border-neutral-300 hover:bg-neutral-100"
+            >
+              Back to Home
+            </Button>
           </div>
         </div>
       </header>
@@ -127,27 +140,7 @@ const Home: React.FC = () => {
         </div>
       </main>
 
-      <footer className="bg-neutral-900 text-neutral-400 py-6 px-6">
-        <div className="container mx-auto max-w-5xl flex flex-col md:flex-row justify-between items-center text-sm">
-          <div className="mb-4 md:mb-0">
-            <Logo size="small" className="text-white" />
-          </div>
-          <div className="flex space-x-6">
-            <a href="/privacy-policy" className="hover:text-white transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Terms of Service
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Contact Us
-            </a>
-          </div>
-          <div className="mt-4 md:mt-0">
-            © 2025 Carbo Software. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

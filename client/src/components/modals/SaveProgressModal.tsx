@@ -27,7 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 interface SaveProgressModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  surveyData: Record<string, any>;
+  data: Record<string, any>;
 }
 
 const formSchema = z.object({
@@ -42,7 +42,7 @@ type FormData = z.infer<typeof formSchema>;
 const SaveProgressModal: React.FC<SaveProgressModalProps> = ({
   open,
   onOpenChange,
-  surveyData,
+  data,
 }) => {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -54,8 +54,8 @@ const SaveProgressModal: React.FC<SaveProgressModalProps> = ({
   const { toast } = useToast();
 
   const saveProgressMutation = useMutation({
-    mutationFn: async (data: FormData & { surveyData: Record<string, any> }) => {
-      return apiRequest("POST", "/api/survey/save-progress", data);
+    mutationFn: async (formData: FormData & { surveyData: Record<string, any> }) => {
+      return apiRequest("POST", "/api/survey/save-progress", formData);
     },
     onSuccess: () => {
       toast({
@@ -78,7 +78,7 @@ const SaveProgressModal: React.FC<SaveProgressModalProps> = ({
   const onSubmit = (formData: FormData) => {
     saveProgressMutation.mutate({
       ...formData,
-      surveyData,
+      surveyData: data,
     });
   };
 

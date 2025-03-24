@@ -6,6 +6,17 @@ export const surveyData = [
       "Let's understand your daily tasks and the software tools you currently use in your workflows.",
     questions: [
       {
+        id: "websiteUrl",
+        text: "Please enter your company website URL",
+        hint: "Providing your website will help us tailor the assessment to your specific industry and company profile.",
+        type: "url",
+        placeholder: "https://www.yourcompany.com",
+        validation: {
+          required: false,
+          pattern: "url"
+        }
+      },
+      {
         id: "dailyTasks",
         text: "What are the most time-consuming tasks in your typical workday?",
         hint: "For example: email management, data entry, creating reports, appointment scheduling, invoice processing, etc.",

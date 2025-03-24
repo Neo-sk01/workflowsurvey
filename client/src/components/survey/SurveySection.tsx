@@ -1,9 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import QuestionItem from "./QuestionItem";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Save, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, ArrowRight, X } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { useLocation } from "wouter";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SurveySectionProps {
   section: {
@@ -14,7 +26,13 @@ interface SurveySectionProps {
       id: string;
       text: string;
       hint?: string;
-      options: {
+      type?: string;
+      placeholder?: string;
+      validation?: {
+        required?: boolean;
+        pattern?: string;
+      };
+      options?: {
         value: string;
         label: string;
         description: string;
@@ -46,8 +64,18 @@ const SurveySection: React.FC<SurveySectionProps> = ({
     defaultValues: initialData,
     mode: "onChange",
   });
+  const [, navigate] = useLocation();
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
-  const { handleSubmit, formState } = methods;
+  const { handleSubmit, formState, watch } = methods;
+  const allValues = watch();
+  
+  // Calculate completion percentage for this section
+  const totalQuestions = section.questions.length;
+  const answeredQuestions = section.questions.filter(q => 
+    allValues[q.id] && allValues[q.id].trim() !== ""
+  ).length;
+  const completionPercentage = Math.round((answeredQuestions / totalQuestions) * 100);
 
   const onSubmit = (data: Record<string, string>) => {
     onSave(data);
@@ -72,7 +100,7 @@ const SurveySection: React.FC<SurveySectionProps> = ({
               transition={{ delay: 0.2 }}
             >
               <h3 className="text-2xl font-bold text-neutral-900 mb-3">
-                {section.title}
+                {section.title.replace(/^Section \d+: /, '')}
               </h3>
               <p className="text-neutral-600 leading-relaxed">
                 {section.description}
@@ -86,49 +114,80 @@ const SurveySection: React.FC<SurveySectionProps> = ({
                   id={question.id}
                   text={question.text}
                   hint={question.hint}
-                  options={question.options}
+                  type={question.type}
+                  placeholder={question.placeholder}
+                  validation={question.validation}
+                  options={question.options || []}
                   isFirst={index === 0}
                 />
               ))}
             </div>
           </div>
 
-          <div className="px-6 py-5 bg-neutral-50 border-t border-neutral-200 flex flex-col sm:flex-row justify-between items-center">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onPrevious}
-              disabled={isFirst}
-              className="text-neutral-700 font-medium mb-3 sm:mb-0 w-full sm:w-auto"
-            >
-              <ChevronLeft className="w-4 h-4 mr-2" />
-              Previous Section
-            </Button>
+          <div className="px-6 py-5 bg-neutral-50 border-t border-neutral-200">
+            <div className="flex flex-col">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onPrevious}
+                    disabled={isFirst}
+                    className={`text-neutral-700 font-medium ${isFirst ? 'opacity-50' : 'hover:bg-neutral-100'}`}
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-2" />
+                    Previous
+                  </Button>
+                  
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setShowCancelDialog(true)}
+                    className="text-neutral-500 hover:text-neutral-700"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                </div>
 
-            <div className="flex items-center space-x-2 text-sm text-neutral-500 font-medium mb-3 sm:mb-0">
-              <Save className="w-4 h-4 text-neutral-400" />
-              <span>Progress saved automatically</span>
+                <Button
+                  type="submit"
+                  className="bg-primary hover:bg-primary/90 text-white font-medium rounded-md w-full sm:w-auto transition-all duration-300 ease-in-out"
+                >
+                  {isLast ? (
+                    <>
+                      <Check className="w-4 h-4 mr-2" />
+                      Complete Assessment
+                    </>
+                  ) : (
+                    <>
+                      Continue
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
-
-            <Button
-              type="submit"
-              className="bg-primary hover:bg-primary/90 text-white font-medium rounded-md w-full sm:w-auto"
-            >
-              {isLast ? (
-                <>
-                  <CheckCircle2 className="w-4 h-4 mr-2" />
-                  Complete Survey
-                </>
-              ) : (
-                <>
-                  Next Section
-                  <ChevronRight className="w-4 h-4 ml-2" />
-                </>
-              )}
-            </Button>
           </div>
         </form>
       </FormProvider>
+      
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Assessment?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your progress will be lost if you leave now. Are you sure you want to cancel the assessment?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Continue Assessment</AlertDialogCancel>
+            <AlertDialogAction onClick={() => navigate("/")} className="bg-red-500 text-white hover:bg-red-600">
+              Yes, Cancel
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </motion.div>
   );
 };

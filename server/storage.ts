@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Assessment, type InsertAssessment, type Progress, type InsertProgress } from "@shared/schema";
+import { type User, type InsertUser, type Assessment, type InsertAssessment, type Progress, type InsertProgress, type AIAnalysis } from "@shared/schema";
 
 // Interface for storage operations
 export interface IStorage {
@@ -6,6 +6,8 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   saveAssessment(assessment: InsertAssessment): Promise<Assessment>;
+  getAssessment(id: number): Promise<Assessment | undefined>;
+  updateAssessmentAnalysis(id: number, analysis: AIAnalysis): Promise<Assessment | undefined>;
   saveProgress(progress: InsertProgress): Promise<Progress>;
   getProgress(id: number): Promise<Progress | undefined>;
 }
@@ -52,9 +54,28 @@ export class MemStorage implements IStorage {
       id, 
       createdAt: new Date() 
     };
-    
     this.assessments.set(id, assessment);
     return assessment;
+  }
+  
+  async getAssessment(id: number): Promise<Assessment | undefined> {
+    return this.assessments.get(id);
+  }
+  
+  async updateAssessmentAnalysis(id: number, analysis: AIAnalysis): Promise<Assessment | undefined> {
+    const assessment = this.assessments.get(id);
+    
+    if (!assessment) {
+      return undefined;
+    }
+    
+    const updatedAssessment: Assessment = {
+      ...assessment,
+      analysis
+    };
+    
+    this.assessments.set(id, updatedAssessment);
+    return updatedAssessment;
   }
   
   async saveProgress(progressData: InsertProgress): Promise<Progress> {
@@ -62,17 +83,16 @@ export class MemStorage implements IStorage {
     const progress: Progress = {
       ...progressData,
       id,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
-    
     this.progresses.set(id, progress);
     return progress;
   }
-  
+
   async getProgress(id: number): Promise<Progress | undefined> {
     return this.progresses.get(id);
   }
 }
 
-// Export a singleton instance of MemStorage
+// Singleton storage instance
 export const storage = new MemStorage();

@@ -17,6 +17,7 @@ import {
   DollarSign,
   Smile
 } from "lucide-react";
+import { Footer } from "../components/Footer";
 
 const Splash: React.FC = () => {
   const [, navigate] = useLocation();
@@ -230,14 +231,9 @@ const Splash: React.FC = () => {
             Why We're Conducting This Assessment
           </h2>
           <p className="text-lg text-neutral-700 mb-6 leading-relaxed">
-            We created this assessment to help you discover which parts of your business would 
-            benefit most from modern workflow automation. By understanding your current processes, 
-            pain points, and goals, we can provide insights tailored specifically to your situation.
-          </p>
-          <p className="text-lg text-neutral-700 mb-6 leading-relaxed">
-            Through this survey, we're looking to learn about your day-to-day operations, 
-            identify opportunities for improvement, and understand which manual processes are 
-            taking valuable time away from your core business activities.
+            We created this assessment to help you discover your organization's automation potential. 
+            By analyzing your current processes and technologies, we can identify the most impactful
+            opportunities for implementing AI-powered automation in your workflow.
           </p>
           
           <h2 className="text-2xl font-semibold text-neutral-900 mb-4">
@@ -323,27 +319,7 @@ const Splash: React.FC = () => {
         </motion.div>
       </main>
 
-      <footer className="bg-neutral-900 text-neutral-400 py-6 px-6">
-        <div className="container mx-auto max-w-5xl flex flex-col md:flex-row justify-between items-center text-sm">
-          <div className="mb-4 md:mb-0">
-            <Logo size="small" className="text-white" />
-          </div>
-          <div className="flex space-x-6">
-            <a href="/privacy-policy" className="hover:text-white transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Terms of Service
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Contact Us
-            </a>
-          </div>
-          <div className="mt-4 md:mt-0">
-            © 2025 Carbo Software. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

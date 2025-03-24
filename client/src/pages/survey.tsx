@@ -3,21 +3,27 @@ import { useLocation } from "wouter";
 import Logo from "@/components/Logo";
 import ProgressTracker from "@/components/survey/ProgressTracker";
 import SurveySection from "@/components/survey/SurveySection";
+import AIRecommendations from "@/components/survey/AIRecommendations";
 import HelpModal from "@/components/modals/HelpModal";
 import SaveProgressModal from "@/components/modals/SaveProgressModal";
 import { Button } from "@/components/ui/button";
-import { HelpCircle } from "lucide-react";
+import { Zap, HelpCircle, Save } from "lucide-react";
 import { surveyData } from "@/utils/survey-data";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { AnimatePresence } from "framer-motion";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Footer } from "../components/Footer";
 
 const Survey: React.FC = () => {
   const [currentSection, setCurrentSection] = useState(1);
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [helpModalOpen, setHelpModalOpen] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
+  const [showAIRecommendations, setShowAIRecommendations] = useState(false);
   
   const [, navigate] = useLocation();
   const { toast } = useToast();
@@ -42,8 +48,8 @@ const Survey: React.FC = () => {
     }
   };
 
-  const handleSectionChange = (section: number) => {
-    if (section < currentSection) {
+  const handleSectionClick = (section: number) => {
+    if (section <= currentSection) {
       setCurrentSection(section);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -75,106 +81,82 @@ const Survey: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <header className="bg-white shadow-sm py-4 px-6 fixed top-0 left-0 right-0 z-10">
-        <div className="container mx-auto flex justify-between items-center">
+    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex flex-col">
+      <header className="bg-white border-b border-neutral-200 sticky top-0 z-10 shadow-sm">
+        <div className="container mx-auto px-2 py-1 flex justify-between items-center">
           <div className="flex items-center">
-            <Logo size="medium" className="text-primary" />
+            <a href="/" className="flex items-center hover:opacity-80 transition-opacity p-0">
+              <Logo size="small" className="" />
+            </a>
           </div>
-
-          <div className="flex items-center space-x-4">
+          
+          <div className="flex items-center space-x-3">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
-              onClick={() => setSaveModalOpen(true)}
-              className="text-sm text-neutral-600 hover:text-primary"
+              onClick={() => navigate("/")}
+              className="text-neutral-600 border-neutral-300 hover:bg-neutral-100 mr-2"
             >
-              Save Progress
+              Back to Home
             </Button>
             <Button
               variant="ghost"
               size="sm"
+              className="text-neutral-600 hover:text-neutral-800"
               onClick={() => setHelpModalOpen(true)}
-              className="text-sm text-neutral-600 hover:text-primary"
             >
-              Need Help?
+              <HelpCircle className="h-5 w-5" />
+              <span className="ml-1 hidden sm:inline">Help</span>
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="flex-grow pt-20 pb-16 px-4 sm:px-6 md:px-8">
-        <div className="container mx-auto max-w-4xl">
-          <div className="text-center mb-8 mt-6">
-            <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-3">
+      <main className="flex-1 container mx-auto px-4 py-8 md:py-12 flex flex-col">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-neutral-800">
               Workflow Automation Readiness Assessment
             </h2>
-            <p className="text-neutral-600 max-w-2xl mx-auto">
-              Discover your business's automation potential and identify
-              opportunities to streamline operations.
-            </p>
           </div>
-
-          <ProgressTracker
-            currentSection={currentSection}
-            totalSections={totalSections}
-            onSectionClick={handleSectionChange}
-          />
-
-          <AnimatePresence mode="wait">
-            <SurveySection
-              key={currentSection}
-              section={currentSectionData}
-              onPrevious={handlePrevious}
-              onNext={handleNext}
-              initialData={formData}
-              onSave={handleSaveFormData}
-              isFirst={currentSection === 1}
-              isLast={currentSection === totalSections}
-              currentSection={currentSection}
-              totalSections={totalSections}
-            />
-          </AnimatePresence>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSaveModalOpen(true)}
+            className="hidden sm:flex items-center gap-2 border-primary/30 text-primary hover:bg-primary/5"
+          >
+            <Save className="h-4 w-4" />
+            <span>Save Progress</span>
+          </Button>
         </div>
+        
+        <ProgressTracker 
+          currentSection={currentSection}
+          totalSections={totalSections}
+          onSectionClick={handleSectionClick}
+        />
+
+        <SurveySection
+          section={currentSectionData}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+          initialData={formData}
+          onSave={handleSaveFormData}
+          isFirst={currentSection === 1}
+          isLast={currentSection === totalSections}
+          currentSection={currentSection}
+          totalSections={totalSections}
+        />
       </main>
 
-      <div className="fixed bottom-6 right-6 z-20">
-        <Button
-          size="icon"
-          className="rounded-full w-12 h-12 bg-cyan-500 hover:bg-cyan-600 shadow-lg"
-          onClick={() => setHelpModalOpen(true)}
-        >
-          <HelpCircle className="h-6 w-6" />
-        </Button>
-      </div>
-
-      <footer className="bg-neutral-900 text-neutral-400 py-6 px-6">
-        <div className="container mx-auto max-w-4xl flex flex-col md:flex-row justify-between items-center text-sm">
-          <div className="mb-4 md:mb-0">
-            <Logo size="small" className="text-white" />
-          </div>
-          <div className="flex space-x-6">
-            <a href="/privacy-policy" className="hover:text-white transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Terms of Service
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Contact Us
-            </a>
-          </div>
-          <div className="mt-4 md:mt-0">
-            © 2025 Carbo Software. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       <HelpModal open={helpModalOpen} onOpenChange={setHelpModalOpen} />
       <SaveProgressModal
         open={saveModalOpen}
         onOpenChange={setSaveModalOpen}
-        surveyData={formData}
+        data={formData}
       />
     </div>
   );
