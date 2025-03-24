@@ -1,14 +1,20 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
+import { initRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import * as dotenv from 'dotenv';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import cors from 'cors';
+import { createServer } from 'http';
+import { fileURLToPath } from 'url';
 
 // Load environment variables from .env file
 dotenv.config();
+
+// ES module equivalent for __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Create uploads directory if it doesn't exist
 const uploadsDir = path.join(__dirname, '../uploads');
@@ -93,7 +99,8 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app);
+  // Initialize routes
+  initRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -102,6 +109,9 @@ app.use((req, res, next) => {
     res.status(status).json({ message });
     throw err;
   });
+
+  // Create HTTP server
+  const server = createServer(app);
 
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
