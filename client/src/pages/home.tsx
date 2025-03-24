@@ -20,11 +20,11 @@ const Home: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <header className="bg-white shadow-sm py-4 px-6">
+      <header className="bg-white shadow-sm py-2 px-4">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center">
             <a href="/" className="hover:opacity-80 transition-opacity">
-              <Logo size="medium" className="text-primary" />
+              <Logo size="small" className="text-primary" />
             </a>
           </div>
           <div>

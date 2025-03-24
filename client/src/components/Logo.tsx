@@ -12,10 +12,10 @@ const Logo: React.FC<LogoProps> = ({
   variant = "default" 
 }) => {
   const sizeClasses = {
-    small: "h-40 w-auto",
-    medium: "h-48 w-auto",
-    large: "h-56 w-auto",
-    footer: "h-[160px] w-auto"
+    small: "h-32 w-auto",
+    medium: "h-40 w-auto",
+    large: "h-48 w-auto",
+    footer: "h-[140px] w-auto"
   };
 
   const logoSrc = variant === "negative" ? "/csd negative.png" : "/logo.png";

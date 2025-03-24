@@ -25,10 +25,10 @@ const Splash: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-100 to-white">
-      <header className="bg-white shadow-sm py-4 px-6">
+      <header className="bg-white shadow-sm py-2 px-4">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center">
-            <Logo size="medium" className="text-primary" />
+            <Logo size="small" className="text-primary" />
           </div>
         </div>
       </header>

@@ -332,29 +332,29 @@ const Survey: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex flex-col">
       <header className={`bg-white border-b border-neutral-200 sticky top-0 z-10 shadow-sm transition-transform duration-300 ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-        <div className="container mx-auto px-0.5 py-0 flex justify-between items-center max-w-[92%]">
+        <div className="container mx-auto px-1 py-0.5 flex justify-between items-center max-w-[92%]">
           <div className="flex items-center">
             <a href="/" className="flex items-center hover:opacity-80 transition-opacity p-0">
-              <Logo size="small" className="scale-90 origin-left" />
+              <Logo size="small" className="scale-75 origin-left" />
             </a>
           </div>
           
-          <div className="flex items-center space-x-1.5">
+          <div className="flex items-center space-x-1">
             <Button
               variant="outline"
               size="sm"
               onClick={() => navigate("/")}
-              className="text-neutral-600 border-neutral-300 hover:bg-neutral-100 mr-0.5 text-xs py-0.5 h-7"
+              className="text-neutral-600 border-neutral-300 hover:bg-neutral-100 mr-0.5 text-xs py-0.5 h-6"
             >
               Back to Home
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              className="text-neutral-600 hover:text-neutral-800 text-xs py-0.5 h-7"
+              className="text-neutral-600 hover:text-neutral-800 text-xs py-0.5 h-6"
               onClick={() => setHelpModalOpen(true)}
             >
-              <HelpCircle className="h-3.5 w-3.5" />
+              <HelpCircle className="h-3 w-3" />
               <span className="ml-0.5 hidden sm:inline">Help</span>
             </Button>
           </div>
