@@ -94,13 +94,16 @@ const SurveySection: React.FC<SurveySectionProps> = ({
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="p-6 md:p-8">
             <motion.div 
-              className="mb-8 border-l-4 border-primary pl-4 py-2"
+              className="mb-8 border-l-4 border-gradient-l-primary-to-blue pl-4 py-2 relative"
               initial={{ x: -10, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              <h3 className="text-2xl font-bold text-neutral-900 mb-3">
-                {section.title.replace(/^Section \d+: /, '')}
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-blue-500"></div>
+              <h3 className="text-2xl font-bold mb-3">
+                <span className="bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
+                  {section.title.replace(/^Section \d+: /, '')}
+                </span>
               </h3>
               <p className="text-neutral-600 leading-relaxed">
                 {section.description}
@@ -152,7 +155,7 @@ const SurveySection: React.FC<SurveySectionProps> = ({
 
                 <Button
                   type="submit"
-                  className="bg-primary hover:bg-primary/90 text-white font-medium rounded-md w-full sm:w-auto transition-all duration-300 ease-in-out"
+                  className="w-full sm:w-auto transition-all duration-300 ease-in-out"
                 >
                   {isLast ? (
                     <>

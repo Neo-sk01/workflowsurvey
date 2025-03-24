@@ -7,7 +7,7 @@ import AIRecommendations from "@/components/survey/AIRecommendations";
 import HelpModal from "@/components/modals/HelpModal";
 import SaveProgressModal from "@/components/modals/SaveProgressModal";
 import { Button } from "@/components/ui/button";
-import { Zap, HelpCircle, Save, Upload, Paperclip, X } from "lucide-react";
+import { Zap, HelpCircle, Save, Upload, Paperclip, X, Star, ExternalLink, ArrowUpRight } from "lucide-react";
 import { surveyData } from "@/utils/survey-data";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -19,6 +19,103 @@ import { Progress } from "@/components/ui/progress";
 import { Footer } from "../components/Footer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+// Custom promotional modal component
+const PromoModal: React.FC<{
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}> = ({ open, onOpenChange }) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[550px] bg-gradient-to-br from-white to-neutral-50 border-none shadow-xl">
+        <div className="absolute top-2 right-2 z-50">
+          <Button
+            variant="ghost"
+            className="h-7 w-7 p-0 rounded-full hover:bg-neutral-100"
+            onClick={() => onOpenChange(false)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        <DialogHeader className="mb-4">
+          <div className="relative w-full flex justify-center mb-2">
+            <div className="absolute -top-7 -left-7 bg-primary/10 w-16 h-16 rounded-full blur-2xl"></div>
+            <div className="absolute -top-2 right-16 bg-blue-400/20 w-12 h-12 rounded-full blur-xl"></div>
+            <div className="bg-gradient-to-r from-primary to-blue-500 text-white px-4 py-1 rounded-full flex items-center gap-1.5 shadow-md">
+              <Star className="h-4 w-4 fill-white" />
+              <span className="text-sm font-medium">Premium Offer</span>
+            </div>
+          </div>
+          
+          <DialogTitle className="text-2xl font-bold text-center">
+            <span className="bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">Get Your Custom-Tailored Survey Solution</span>
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="py-2">
+          <p className="text-neutral-600 text-center mb-5">
+            Enhance your assessment experience with our premium custom survey solution, designed specifically for your organization's unique needs.
+          </p>
+          
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="bg-white p-3 rounded-lg border border-neutral-100 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="bg-primary/10 p-1.5 rounded-full">
+                  <Zap className="h-4 w-4 text-primary" />
+                </div>
+                <span className="font-medium text-sm">Advanced Analytics</span>
+              </div>
+              <p className="text-xs text-neutral-500">Detailed insights and custom reporting tailored to your industry</p>
+            </div>
+            
+            <div className="bg-white p-3 rounded-lg border border-neutral-100 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="bg-blue-500/10 p-1.5 rounded-full">
+                  <Upload className="h-4 w-4 text-blue-500" />
+                </div>
+                <span className="font-medium text-sm">White Labeling</span>
+              </div>
+              <p className="text-xs text-neutral-500">Branded with your logo and company colors</p>
+            </div>
+            
+            <div className="bg-white p-3 rounded-lg border border-neutral-100 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="bg-purple-500/10 p-1.5 rounded-full">
+                  <HelpCircle className="h-4 w-4 text-purple-500" />
+                </div>
+                <span className="font-medium text-sm">Custom Questions</span>
+              </div>
+              <p className="text-xs text-neutral-500">Tailor questions specific to your business needs</p>
+            </div>
+            
+            <div className="bg-white p-3 rounded-lg border border-neutral-100 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="bg-amber-500/10 p-1.5 rounded-full">
+                  <Star className="h-4 w-4 text-amber-500" />
+                </div>
+                <span className="font-medium text-sm">Integration</span>
+              </div>
+              <p className="text-xs text-neutral-500">Seamlessly connect with your existing systems</p>
+            </div>
+          </div>
+        </div>
+        
+        <DialogFooter className="flex-col sm:flex-col gap-3">
+          <Button 
+            className="w-full bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-500/90 text-white shadow-md"
+            onClick={() => onOpenChange(false)}
+          >
+            Learn More <ArrowUpRight className="h-4 w-4 ml-1.5" />
+          </Button>
+          <p className="text-xs text-center text-neutral-500 mt-1">
+            Contact us at <a href="mailto:neosk@carbosftware.tech" className="text-primary hover:underline">neosk@carbosftware.tech</a> or call <a href="tel:+27813590062" className="text-primary hover:underline">+27 81 359 0062</a> for pricing details
+          </p>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 // Component for file attachment
 const FileAttachment: React.FC<{
@@ -124,12 +221,22 @@ const Survey: React.FC = () => {
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [companyProfileFile, setCompanyProfileFile] = useState<File | null>(null);
+  const [promoModalOpen, setPromoModalOpen] = useState(false);
   
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
   const totalSections = surveyData.length;
   const currentSectionData = surveyData[currentSection - 1];
+
+  // Show promo modal after a delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPromoModalOpen(true);
+    }, 10000); // Show after 10 seconds
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   // Handle scroll behavior for header
   useEffect(() => {
@@ -314,6 +421,10 @@ const Survey: React.FC = () => {
         open={saveModalOpen}
         onOpenChange={setSaveModalOpen}
         data={formData}
+      />
+      <PromoModal 
+        open={promoModalOpen}
+        onOpenChange={setPromoModalOpen}
       />
     </div>
   );

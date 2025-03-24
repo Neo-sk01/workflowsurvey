@@ -35,7 +35,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ open, onOpenChange }) => {
             <div className="ml-3">
               <h4 className="text-sm font-medium text-neutral-900">Email Us</h4>
               <p className="text-sm text-neutral-600">
-                support@carbosoftware.com
+                neosk@carbosftware.tech
               </p>
             </div>
           </div>
@@ -46,7 +46,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ open, onOpenChange }) => {
             </div>
             <div className="ml-3">
               <h4 className="text-sm font-medium text-neutral-900">Call Us</h4>
-              <p className="text-sm text-neutral-600">(555) 123-4567</p>
+              <p className="text-sm text-neutral-600">+27 81 359 0062</p>
             </div>
           </div>
         </div>

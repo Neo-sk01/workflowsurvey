@@ -48,7 +48,7 @@ const Home: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            Workflow Automation Readiness Assessment
+            Workflow Automation <span className="bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">Readiness Assessment</span>
           </motion.h1>
           <motion.p
             className="text-xl text-neutral-600 max-w-2xl mx-auto"
@@ -68,7 +68,7 @@ const Home: React.FC = () => {
             transition={{ duration: 0.5, delay: 0.3 }}
           >
             <h2 className="text-2xl font-semibold text-neutral-900 mb-6">
-              Are you ready to transform your business with AI-powered
+              Are you ready to <span className="bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">transform your business</span> with AI-powered
               automation?
             </h2>
             <div className="space-y-4 mb-8">
@@ -82,7 +82,6 @@ const Home: React.FC = () => {
             <Button
               size="lg"
               onClick={() => navigate("/survey")}
-              className="text-white bg-primary hover:bg-primary-600"
             >
               Begin Assessment
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -94,11 +93,11 @@ const Home: React.FC = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            <Card className="shadow-lg border-0">
+            <Card className="shadow-lg border-0 bg-gradient-to-br from-primary/5 to-blue-500/5 border border-primary/20">
               <CardContent className="p-8">
                 <div className="text-center mb-6">
                   <h3 className="text-xl font-semibold text-neutral-900 mb-2">
-                    What You'll Learn
+                    <span className="bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">What You'll Learn</span>
                   </h3>
                   <p className="text-neutral-600">
                     This assessment will help you understand:

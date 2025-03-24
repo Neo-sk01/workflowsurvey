@@ -105,7 +105,14 @@ export default {
   			'accordion-up': 'accordion-up 0.2s ease-out',
             'pulse-slow': 'pulse-glow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             'bounce-slow': 'bounce-slow 2s infinite'
-  		}
+  		},
+        backgroundImage: {
+          'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+          'gradient-primary': 'linear-gradient(to right, hsl(var(--primary)), #3b82f6)',
+        },
+        borderImage: {
+          'gradient-primary': 'linear-gradient(to right, hsl(var(--primary)), #3b82f6) 1',
+        }
   	}
   },
   plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],

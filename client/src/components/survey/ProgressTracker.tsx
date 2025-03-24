@@ -43,13 +43,13 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
           animate={{ opacity: 1 }}
           key={currentSection}
         >
-          <span className="inline-block bg-primary text-white text-xs px-2 py-1 rounded-md mr-2">
+          <span className="inline-block bg-gradient-to-r from-primary to-blue-500 text-white text-xs px-2 py-1 rounded-md mr-2 shadow-sm">
             {sectionIcons[currentSection - 1]}
           </span>
-          Section {currentSection}: {sectionLabels[currentSection - 1]}
+          Section {currentSection}: <span className="text-primary">{sectionLabels[currentSection - 1]}</span>
         </motion.span>
         <motion.span 
-          className="text-sm font-medium text-primary"
+          className="text-sm font-medium bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           key={`progress-${currentSection}`}
@@ -60,7 +60,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
       
       <div className="h-3 w-full bg-neutral-200 rounded-full overflow-hidden shadow-inner">
         <motion.div
-          className="h-full bg-gradient-to-r from-primary/80 to-primary rounded-full"
+          className="h-full bg-gradient-to-r from-primary to-blue-500 rounded-full"
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.5 }}
@@ -88,9 +88,9 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                   className={cn(
                     "w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 shadow",
                     isActive 
-                      ? "bg-primary text-white scale-110 ring-4 ring-primary/20" 
+                      ? "bg-gradient-to-r from-primary to-blue-500 text-white scale-110 ring-4 ring-primary/20" 
                       : isCompleted 
-                      ? "bg-green-500 text-white"
+                      ? "bg-gradient-to-r from-primary/90 to-blue-500/90 text-white"
                       : "bg-neutral-200 text-neutral-600"
                   )}
                   animate={isActive ? { scale: [1, 1.05, 1] } : {}}

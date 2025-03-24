@@ -12,6 +12,7 @@ const toggleVariants = cva(
         default: "bg-transparent",
         outline:
           "border border-input bg-transparent hover:bg-accent hover:text-accent-foreground",
+        gradient: "bg-gradient-to-r from-primary to-blue-500 text-white hover:from-primary/90 hover:to-blue-500/90 data-[state=on]:bg-gradient-to-r data-[state=on]:from-primary data-[state=on]:to-blue-500 data-[state=on]:text-white",
       },
       size: {
         default: "h-10 px-3",
