@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import Logo from "@/components/Logo";
 import ProgressTracker from "@/components/survey/ProgressTracker";
@@ -7,16 +7,113 @@ import AIRecommendations from "@/components/survey/AIRecommendations";
 import HelpModal from "@/components/modals/HelpModal";
 import SaveProgressModal from "@/components/modals/SaveProgressModal";
 import { Button } from "@/components/ui/button";
-import { Zap, HelpCircle, Save } from "lucide-react";
+import { Zap, HelpCircle, Save, Upload, Paperclip, X } from "lucide-react";
 import { surveyData } from "@/utils/survey-data";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Footer } from "../components/Footer";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+// Component for file attachment
+const FileAttachment: React.FC<{
+  onFileChange: (file: File | null) => void;
+  file: File | null;
+}> = ({ onFileChange, file }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0] || null;
+    if (selectedFile && !selectedFile.type.includes('pdf')) {
+      alert('Please upload a PDF file');
+      return;
+    }
+    onFileChange(selectedFile);
+  };
+
+  const handleRemoveFile = () => {
+    onFileChange(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  return (
+    <div className="mt-6">
+      <div className="relative border-2 border-dashed border-primary/30 rounded-lg bg-neutral-50 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group">
+        {/* Subtle gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-blue-500/10 to-purple-500/10 rounded-lg opacity-50"></div>
+        
+        {/* Softer glowing animation effect */}
+        <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-blue-500/20 to-purple-500/20 rounded-lg blur opacity-20 group-hover:opacity-30 animate-[pulse_4s_ease-in-out_infinite] transition-all duration-500"></div>
+        
+        {/* Content container */}
+        <div className="relative p-6">
+          <Label htmlFor="company-profile" className="mb-2 block font-medium text-neutral-700">
+            Attach Company Profile (PDF)
+          </Label>
+          
+          {!file ? (
+            <div className="flex flex-col items-center justify-center py-6">
+              <div className="animate-[bounce_3s_ease-in-out_infinite] mb-3 p-3 bg-primary/5 rounded-full">
+                <Paperclip className="h-10 w-10 text-primary/80 drop-shadow-sm" />
+              </div>
+              <p className="text-sm text-neutral-600 mb-4 font-medium text-center max-w-md">
+                Upload your company profile to help us provide a more accurate assessment of your automation needs
+              </p>
+              <div className="flex items-center gap-3">
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-2 bg-gradient-to-r from-primary to-blue-500 text-white hover:from-primary/90 hover:to-blue-500/90 border-none shadow-md hover:shadow-lg transition-all"
+                >
+                  <Upload className="h-4 w-4" />
+                  Browse files
+                </Button>
+                <span className="text-xs text-neutral-500">PDF files only, max 10MB</span>
+              </div>
+              <input
+                type="file"
+                id="company-profile"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="application/pdf"
+                className="hidden"
+              />
+            </div>
+          ) : (
+            <div className="flex items-center justify-between bg-white p-4 rounded border border-neutral-200 my-2">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-full">
+                  <Paperclip className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <span className="text-sm font-medium truncate max-w-[200px] block">{file.name}</span>
+                  <span className="text-xs text-neutral-500">({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                </div>
+              </div>
+              <Button 
+                type="button" 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleRemoveFile}
+                className="h-8 w-8 p-0 rounded-full hover:bg-red-50 hover:text-red-500"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Survey: React.FC = () => {
   const [currentSection, setCurrentSection] = useState(1);
@@ -26,6 +123,7 @@ const Survey: React.FC = () => {
   const [showAIRecommendations, setShowAIRecommendations] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [companyProfileFile, setCompanyProfileFile] = useState<File | null>(null);
   
   const [, navigate] = useLocation();
   const { toast } = useToast();
@@ -82,16 +180,35 @@ const Survey: React.FC = () => {
 
   const handleSaveFormData = (sectionData: Record<string, string>) => {
     setFormData((prev) => ({ ...prev, ...sectionData }));
+    
+    // No need to show toast notification about company profile
+    // since the attachment component is now shown on the first page
   };
 
   const submitSurveyMutation = useMutation({
     mutationFn: async (data: Record<string, string>) => {
-      return apiRequest("POST", "/api/survey/submit", data);
+      // Create a FormData object to send both the survey data and file
+      const formData = new FormData();
+      
+      // Add all the survey data
+      Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      
+      // Add the file if it exists
+      if (companyProfileFile) {
+        formData.append('companyProfile', companyProfileFile);
+      }
+      
+      // Use the updated apiRequest function
+      return apiRequest("POST", "/api/survey/submit", formData, { isFormData: true });
     },
     onSuccess: () => {
       toast({
         title: "Assessment submitted successfully!",
-        description: "Thank you for completing the assessment.",
+        description: companyProfileFile 
+          ? "Thank you for providing your company profile. We'll use it to enhance your assessment." 
+          : "Thank you for completing the assessment.",
         variant: "default",
       });
       navigate("/thank-you");
@@ -173,6 +290,21 @@ const Survey: React.FC = () => {
           currentSection={currentSection}
           totalSections={totalSections}
         />
+
+        {/* Company Profile Attachment - show only on the first section */}
+        {currentSection === 1 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-6"
+          >
+            <FileAttachment 
+              onFileChange={setCompanyProfileFile}
+              file={companyProfileFile}
+            />
+          </motion.div>
+        )}
       </main>
 
       <Footer />

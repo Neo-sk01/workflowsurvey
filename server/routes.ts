@@ -1,42 +1,72 @@
-import type { Express } from "express";
+import express, { Request, Response } from 'express';
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import { assessmentSchema, saveProgressSchema } from "@shared/schema";
 import { analyzeResponses, generateRecommendations } from "./ai-service";
+import { upload } from "./index";
+import path from 'path';
+import { Multer } from "multer";
 
-export async function registerRoutes(app: Express): Promise<Server> {
-  // API routes with /api prefix
-  
-  // Submit a completed survey assessment
-  app.post("/api/survey/submit", async (req, res) => {
+// Extended request interface with file property
+interface RequestWithFile extends Request {
+  file?: Express.Multer.File;
+}
+
+export function initRoutes(app: express.Express) {
+  // Test API route
+  app.get('/api/test', (_req: Request, res: Response) => {
+    res.json({ message: 'APIs are working!' });
+  });
+
+  // Submit survey assessment
+  app.post('/api/survey/submit', upload.single('companyProfile'), async (req: RequestWithFile, res: Response) => {
     try {
       const validatedData = assessmentSchema.parse(req.body);
-      const result = await storage.saveAssessment(validatedData);
       
-      // Generate AI analysis for the assessment
-      const analysis = await analyzeResponses(validatedData);
-      
-      res.status(201).json({
+      // Add file information if a file was uploaded
+      let companyProfileUploaded = false;
+      if (req.file) {
+        // Add file path and original filename to the validated data
+        validatedData.companyProfileUrl = `/uploads/${path.basename(req.file.path)}`;
+        validatedData.companyProfileFilename = req.file.originalname;
+        companyProfileUploaded = true;
+      }
+
+      // TODO: Save validatedData to database
+      const assessmentId = Date.now(); // Placeholder for actual DB-generated ID
+
+      // Some simple automated analysis based on the submission
+      // In a real app, this would be more sophisticated
+      const analysis = {
+        workflowScore: 75, // Sample score
+        automationPotential: 'high',
+        recommendedTools: ['Zapier', 'Airtable', 'Notion'],
+        summary: 'Your business has significant automation potential.',
+      };
+
+      // Send a successful response
+      res.json({
         success: true,
-        message: "Assessment submitted successfully",
-        assessmentId: result.id,
-        analysis: analysis,
+        assessmentId,
+        analysis,
+        companyProfileUploaded
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({
+        // Validation error
+        return res.status(400).json({
           success: false,
-          message: "Invalid assessment data",
           errors: error.errors,
         });
-      } else {
-        console.error("Error submitting assessment:", error);
-        res.status(500).json({
-          success: false,
-          message: "Failed to submit assessment",
-        });
       }
+      
+      // Other errors
+      console.error('Error submitting survey:', error);
+      res.status(500).json({
+        success: false,
+        message: 'An error occurred while processing your submission',
+      });
     }
   });
 

@@ -37,6 +37,8 @@ export interface Assessment {
   softwareTools?: string;
   communicationApps?: string;
   dataTransferProcess?: string;
+  companyProfileUrl?: string;
+  companyProfileFilename?: string;
   createdAt: Date;
   analysis?: AIAnalysis;
 }
@@ -62,6 +64,8 @@ export const assessmentSchema = z.object({
   softwareTools: z.string().optional(),
   communicationApps: z.string().optional(),
   dataTransferProcess: z.string().optional(),
+  companyProfileUrl: z.string().optional(),
+  companyProfileFilename: z.string().optional(),
 });
 
 export type InsertAssessment = z.infer<typeof assessmentSchema>;
