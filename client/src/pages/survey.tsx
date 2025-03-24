@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import Logo from "@/components/Logo";
 import ProgressTracker from "@/components/survey/ProgressTracker";
@@ -24,12 +24,37 @@ const Survey: React.FC = () => {
   const [helpModalOpen, setHelpModalOpen] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [showAIRecommendations, setShowAIRecommendations] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
   const totalSections = surveyData.length;
   const currentSectionData = surveyData[currentSection - 1];
+
+  // Handle scroll behavior for header
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down, hide header after scrolling 100px
+        setIsHeaderVisible(false);
+      } else {
+        // Scrolling up, show header
+        setIsHeaderVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [lastScrollY]);
 
   const handlePrevious = () => {
     if (currentSection > 1) {
@@ -82,31 +107,31 @@ const Survey: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex flex-col">
-      <header className="bg-white border-b border-neutral-200 sticky top-0 z-10 shadow-sm">
-        <div className="container mx-auto px-2 py-1 flex justify-between items-center">
+      <header className={`bg-white border-b border-neutral-200 sticky top-0 z-10 shadow-sm transition-transform duration-300 ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+        <div className="container mx-auto px-0.5 py-0 flex justify-between items-center max-w-[92%]">
           <div className="flex items-center">
             <a href="/" className="flex items-center hover:opacity-80 transition-opacity p-0">
-              <Logo size="small" className="" />
+              <Logo size="small" className="scale-90 origin-left" />
             </a>
           </div>
           
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-1.5">
             <Button
               variant="outline"
               size="sm"
               onClick={() => navigate("/")}
-              className="text-neutral-600 border-neutral-300 hover:bg-neutral-100 mr-2"
+              className="text-neutral-600 border-neutral-300 hover:bg-neutral-100 mr-0.5 text-xs py-0.5 h-7"
             >
               Back to Home
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              className="text-neutral-600 hover:text-neutral-800"
+              className="text-neutral-600 hover:text-neutral-800 text-xs py-0.5 h-7"
               onClick={() => setHelpModalOpen(true)}
             >
-              <HelpCircle className="h-5 w-5" />
-              <span className="ml-1 hidden sm:inline">Help</span>
+              <HelpCircle className="h-3.5 w-3.5" />
+              <span className="ml-0.5 hidden sm:inline">Help</span>
             </Button>
           </div>
         </div>
