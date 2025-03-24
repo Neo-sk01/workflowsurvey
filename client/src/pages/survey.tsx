@@ -233,7 +233,7 @@ const Survey: React.FC = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setPromoModalOpen(true);
-    }, 10000); // Show after 10 seconds
+    }, 20000); // Show after 20 seconds
     
     return () => clearTimeout(timer);
   }, []);
