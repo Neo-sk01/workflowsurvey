@@ -1,0 +1,50 @@
+Small Business Workflow Automation Readiness Assessment
+Section 1: Repetitive Tasks & Daily Operations
+Do you have routine tasks that take up valuable time?
+(For example, manual data entry, repetitive email follow-ups, or routine report generation.)
+
+Are your employees often tied up with tasks that could be automated?
+(Think of processes that need to be done the same way every day, like processing invoices or scheduling appointments.)
+
+Do you frequently experience errors due to manual handling of data?
+(For instance, mistakes in data entry or miscommunication when transferring information between systems.)
+
+Section 2: Systems Integration & Data Management
+Do you use multiple software tools (such as a CRM, accounting software, or project management tools) that don’t easily share information?
+(This might be causing delays or data mismatches between departments.)
+
+Are you manually updating or transferring data between systems?
+(For example, copying customer details from one platform to another.)
+
+Would you benefit from real-time updates and automated notifications about task progress?
+(Imagine receiving an immediate alert when a customer inquiry is answered or when an order is processed.)
+
+Section 3: Business Growth & Scalability
+Is your business growing, leading to challenges like onboarding new employees or managing higher volumes of orders and customer requests?
+(Growing pains that make it hard to keep processes efficient and error-free.)
+
+Are you finding it difficult to scale operations due to the limitations of manual processes?
+(For instance, a small team struggling to manage increased workloads during busy periods.)
+
+Would automating some of your processes free up your team to focus on more strategic, value-added activities?
+(Such as improving customer service, innovating new products, or expanding marketing efforts.)
+
+Section 4: Process Clarity & Digital Readiness
+Do you have documented, clear processes for your routine operations?
+(Well-defined steps can help determine which parts of your workflow are most ready for automation.)
+
+Is your existing technology infrastructure (like cloud services or digital communication tools) capable of integrating with automation solutions?
+(A basic digital setup that could support new software without major upgrades.)
+
+Are you open to training your team on low-code or no-code automation tools that make the setup and management easier?
+(Tools designed for non-technical users can help you start automating quickly.)
+
+Section 5: Strategic Focus & ROI Potential
+Do you believe that saving time on routine tasks could directly improve your bottom line?
+(If employees spend less time on repetitive work, they can focus on tasks that drive revenue.)
+
+Would you be interested in using AI-driven analytics to monitor workflow performance and identify further opportunities for improvement?
+(Imagine insights that help you pinpoint bottlenecks and optimize resource allocation.)
+
+Are you ready to invest a modest budget now for long-term savings and increased efficiency?
+(Even light automation can provide significant ROI through cost and time savings.)
