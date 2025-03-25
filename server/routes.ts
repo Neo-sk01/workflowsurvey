@@ -7,6 +7,8 @@ import { analyzeResponses, generateRecommendations } from "./ai-service";
 import { upload } from "./index";
 import path from 'path';
 import { Multer } from "multer";
+import { createAssessment } from './models/assessment';
+import { generateAnalysis } from './lib/analysis';
 
 // Extended request interface with file property
 interface RequestWithFile extends Request {
@@ -26,29 +28,35 @@ export function initRoutes(app: express.Express) {
       
       // Add file information if a file was uploaded
       let companyProfileUploaded = false;
+      let companyProfile = undefined;
+      
       if (req.file) {
         // Add file path and original filename to the validated data
-        validatedData.companyProfileUrl = `/uploads/${path.basename(req.file.path)}`;
-        validatedData.companyProfileFilename = req.file.originalname;
+        const fileUrl = `/uploads/${path.basename(req.file.path)}`;
+        const fileName = req.file.originalname;
+        
+        companyProfile = {
+          url: fileUrl,
+          name: fileName
+        };
+        
         companyProfileUploaded = true;
       }
 
-      // TODO: Save validatedData to database
-      const assessmentId = Date.now(); // Placeholder for actual DB-generated ID
-
-      // Some simple automated analysis based on the submission
-      // In a real app, this would be more sophisticated
-      const analysis = {
-        workflowScore: 75, // Sample score
-        automationPotential: 'high',
-        recommendedTools: ['Zapier', 'Airtable', 'Notion'],
-        summary: 'Your business has significant automation potential.',
-      };
+      // Generate AI analysis based on the survey data
+      const analysis = await generateAnalysis(validatedData);
+      
+      // Save to Airtable
+      const assessment = await createAssessment({
+        data: validatedData,
+        companyProfile,
+        analysis
+      });
 
       // Send a successful response
       res.json({
         success: true,
-        assessmentId,
+        assessmentId: assessment.id,
         analysis,
         companyProfileUploaded
       });

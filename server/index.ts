@@ -8,6 +8,7 @@ import fs from 'fs';
 import cors from 'cors';
 import { createServer } from 'http';
 import { fileURLToPath } from 'url';
+import bodyParser from 'body-parser';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -122,13 +123,14 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Use PORT environment variable if available, otherwise use 3000
-  const port = process.env.PORT || 3000;
+  // Use PORT environment variable if available, otherwise use 5000
+  const port = process.env.PORT || 5000;
   server.listen({
     port,
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    console.log(`Airtable config: API key ${process.env.AIRTABLE_API_KEY ? 'set' : 'not set'}, Base ID ${process.env.AIRTABLE_BASE_ID ? 'set' : 'not set'}`);
   });
 })();

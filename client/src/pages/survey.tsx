@@ -7,7 +7,7 @@ import AIRecommendations from "@/components/survey/AIRecommendations";
 import HelpModal from "@/components/modals/HelpModal";
 import SaveProgressModal from "@/components/modals/SaveProgressModal";
 import { Button } from "@/components/ui/button";
-import { Zap, HelpCircle, Save, Upload, Paperclip, X, Star, ExternalLink, ArrowUpRight } from "lucide-react";
+import { Zap, HelpCircle, Save, Upload, Paperclip, X, Star, ExternalLink, ArrowUpRight, AlertTriangle, Check } from "lucide-react";
 import { surveyData } from "@/utils/survey-data";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -19,6 +19,7 @@ import { Progress } from "@/components/ui/progress";
 import { Footer } from "../components/Footer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Spinner from "@/components/ui/spinner";
 
 // Custom promotional modal component
 const PromoModal: React.FC<{
@@ -120,8 +121,8 @@ const PromoModal: React.FC<{
 // Component for file attachment
 const FileAttachment: React.FC<{
   onFileChange: (file: File | null) => void;
-  file: File | null;
-}> = ({ onFileChange, file }) => {
+  selectedFile: File | null;
+}> = ({ onFileChange, selectedFile }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -155,7 +156,7 @@ const FileAttachment: React.FC<{
             Attach Company Profile (PDF)
           </Label>
           
-          {!file ? (
+          {!selectedFile ? (
             <div className="flex flex-col items-center justify-center py-6">
               <div className="animate-[bounce_3s_ease-in-out_infinite] mb-3 p-3 bg-primary/5 rounded-full">
                 <Paperclip className="h-10 w-10 text-primary/80 drop-shadow-sm" />
@@ -191,8 +192,8 @@ const FileAttachment: React.FC<{
                   <Paperclip className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <span className="text-sm font-medium truncate max-w-[200px] block">{file.name}</span>
-                  <span className="text-xs text-neutral-500">({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                  <span className="text-sm font-medium truncate max-w-[200px] block">{selectedFile.name}</span>
+                  <span className="text-xs text-neutral-500">({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)</span>
                 </div>
               </div>
               <Button 
@@ -213,8 +214,14 @@ const FileAttachment: React.FC<{
 };
 
 const Survey: React.FC = () => {
-  const [currentSection, setCurrentSection] = useState(1);
-  const [formData, setFormData] = useState<Record<string, string>>({});
+  const [currentSection, setCurrentSection] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [formData, setFormData] = useState<Record<string, Record<string, string>>>({});
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [helpModalOpen, setHelpModalOpen] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [showAIRecommendations, setShowAIRecommendations] = useState(false);
@@ -227,7 +234,7 @@ const Survey: React.FC = () => {
   const { toast } = useToast();
 
   const totalSections = surveyData.length;
-  const currentSectionData = surveyData[currentSection - 1];
+  const currentSectionData = surveyData[currentSection];
 
   // Show promo modal after a delay
   useEffect(() => {
@@ -262,19 +269,19 @@ const Survey: React.FC = () => {
   }, [lastScrollY]);
 
   const handlePrevious = () => {
-    if (currentSection > 1) {
+    if (currentSection > 0) {
       setCurrentSection(currentSection - 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   const handleNext = () => {
-    if (currentSection < totalSections) {
+    if (currentSection < totalSections - 1) {
       setCurrentSection(currentSection + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
+      setValidationErrors([]);
     } else {
-      // Submit the form if it's the last section
-      submitSurveyMutation.mutate(formData);
+      handleSubmit();
     }
   };
 
@@ -285,49 +292,90 @@ const Survey: React.FC = () => {
     }
   };
 
-  const handleSaveFormData = (sectionData: Record<string, string>) => {
-    setFormData((prev) => ({ ...prev, ...sectionData }));
-    
-    // No need to show toast notification about company profile
-    // since the attachment component is now shown on the first page
+  const handleSaveSection = (data: Record<string, string>) => {
+    setFormData(prev => ({
+      ...prev,
+      [currentSection]: data
+    }));
   };
 
-  const submitSurveyMutation = useMutation({
-    mutationFn: async (data: Record<string, string>) => {
-      // Create a FormData object to send both the survey data and file
-      const formData = new FormData();
+  const handleSubmit = async () => {
+    try {
+      setIsSubmitting(true);
+      setSubmitError(null);
+      setValidationErrors([]);
       
-      // Add all the survey data
-      Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value);
+      // Validate all sections before submitting
+      const missingFields: string[] = [];
+      
+      surveyData.forEach((section, sectionIndex) => {
+        const sectionData = formData[sectionIndex] || {};
+        
+        section.questions
+          .filter(q => q.validation?.required)
+          .forEach(q => {
+            if (!sectionData[q.id] || sectionData[q.id].trim() === "") {
+              missingFields.push(`Section ${sectionIndex + 1}: ${q.text}`);
+            }
+          });
       });
       
-      // Add the file if it exists
-      if (companyProfileFile) {
-        formData.append('companyProfile', companyProfileFile);
+      if (missingFields.length > 0) {
+        setValidationErrors(missingFields);
+        setIsSubmitting(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
       }
       
-      // Use the updated apiRequest function
-      return apiRequest("POST", "/api/survey/submit", formData, { isFormData: true });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Assessment submitted successfully!",
-        description: companyProfileFile 
-          ? "Thank you for providing your company profile. We'll use it to enhance your assessment." 
-          : "Thank you for completing the assessment.",
-        variant: "default",
+      // Flatten form data for submission
+      const flattenedData: Record<string, string> = {};
+      Object.values(formData).forEach(sectionData => {
+        Object.entries(sectionData).forEach(([key, value]) => {
+          flattenedData[key] = value;
+        });
       });
-      navigate("/thank-you");
-    },
-    onError: (error) => {
-      toast({
-        title: "Failed to submit assessment",
-        description: error.message || "Please try again later.",
-        variant: "destructive",
-      });
-    },
-  });
+      
+      const formDataToSend = new FormData();
+      
+      // Append all the survey data as a JSON string to one field
+      formDataToSend.append('surveyData', JSON.stringify(flattenedData));
+      
+      // If there's a file, append it
+      if (selectedFile) {
+        formDataToSend.append('companyProfile', selectedFile);
+      }
+      
+      const response = await apiRequest<{ success: boolean; id: string; analysis: string }>(
+        '/api/survey/submit',
+        'POST',
+        formDataToSend,
+        { isFormData: true }
+      );
+      
+      if (response.success) {
+        setSubmitSuccess(true);
+        
+        // Store assessment ID for redirection
+        localStorage.setItem('latestAssessmentId', response.id);
+        
+        // Redirect to results page after a delay
+        setTimeout(() => {
+          window.location.href = `/results/${response.id}`;
+        }, 2000);
+      } else {
+        setSubmitError('Failed to submit survey. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting survey:', error);
+      setSubmitError('An unexpected error occurred. Please try again later.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleFileChange = (file: File | null) => {
+    setSelectedFile(file);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex flex-col">
@@ -386,31 +434,70 @@ const Survey: React.FC = () => {
           onSectionClick={handleSectionClick}
         />
 
-        <SurveySection
-          section={currentSectionData}
-          onPrevious={handlePrevious}
-          onNext={handleNext}
-          initialData={formData}
-          onSave={handleSaveFormData}
-          isFirst={currentSection === 1}
-          isLast={currentSection === totalSections}
-          currentSection={currentSection}
-          totalSections={totalSections}
-        />
+        {validationErrors.length > 0 && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-start">
+              <AlertTriangle className="h-5 w-5 text-red-500 mr-2 mt-0.5" />
+              <div>
+                <h3 className="text-red-800 font-medium mb-2">Please fix the following issues:</h3>
+                <ul className="list-disc pl-5 text-red-700 text-sm space-y-1">
+                  {validationErrors.map((error, index) => (
+                    <li key={index}>{error}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
 
-        {/* Company Profile Attachment - show only on the first section */}
-        {currentSection === 1 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="mt-6"
-          >
-            <FileAttachment 
-              onFileChange={setCompanyProfileFile}
-              file={companyProfileFile}
+        {isSubmitting ? (
+          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+            <Spinner size="large" />
+            <p className="mt-4 text-neutral-600">Submitting your assessment...</p>
+          </div>
+        ) : submitSuccess ? (
+          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Check className="h-8 w-8 text-green-600" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Assessment Submitted!</h2>
+            <p className="text-neutral-600 mb-6">
+              Thank you for completing the assessment. Redirecting you to your results...
+            </p>
+            <Spinner size="small" />
+          </div>
+        ) : (
+          <>
+            <SurveySection
+              section={currentSectionData}
+              onPrevious={handlePrevious}
+              onNext={handleNext}
+              initialData={formData[currentSection] || {}}
+              onSave={handleSaveSection}
+              isFirst={currentSection === 0}
+              isLast={currentSection === totalSections - 1}
+              currentSection={currentSection + 1}
+              totalSections={totalSections}
             />
-          </motion.div>
+            
+            {currentSection === totalSections - 2 && (
+              <div className="mt-8">
+                <FileAttachment
+                  onFileChange={handleFileChange}
+                  selectedFile={selectedFile}
+                />
+              </div>
+            )}
+          </>
+        )}
+        
+        {submitError && (
+          <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex">
+              <AlertTriangle className="h-5 w-5 text-red-500 mr-2" />
+              <p className="text-red-700">{submitError}</p>
+            </div>
+          </div>
         )}
       </main>
 

@@ -20,6 +20,7 @@ export const surveyData = [
         id: "dailyTasks",
         text: "What are the most time-consuming tasks in your typical workday?",
         hint: "For example: email management, data entry, creating reports, appointment scheduling, invoice processing, etc.",
+        type: "radio",
         options: [
           {
             value: "administrative",
@@ -52,6 +53,7 @@ export const surveyData = [
         id: "softwareTools",
         text: "Which software applications do you currently use most frequently in your workflow?",
         hint: "Select the tools that your team uses regularly in daily operations.",
+        type: "radio",
         options: [
           {
             value: "productivity",
@@ -84,6 +86,7 @@ export const surveyData = [
         id: "communicationApps",
         text: "What communication tools does your team use for internal and external communication?",
         hint: "Think about the apps you use to stay in touch with team members and clients.",
+        type: "radio",
         options: [
           {
             value: "email",
@@ -116,6 +119,7 @@ export const surveyData = [
         id: "dataTransferProcess",
         text: "How do you currently transfer data between your different software systems?",
         hint: "Consider how information moves from one system to another in your workflow.",
+        type: "radio",
         options: [
           {
             value: "manual-entry",
@@ -156,69 +160,28 @@ export const surveyData = [
         id: "repetitiveTasks",
         text: "Do you have routine tasks that take up valuable time?",
         hint: "For example, manual data entry, repetitive email follow-ups, or routine report generation.",
-        options: [
-          {
-            value: "frequently",
-            label: "Yes, frequently",
-            description: "We spend significant time on repetitive tasks",
-          },
-          {
-            value: "sometimes",
-            label: "Sometimes",
-            description:
-              "We have some repetitive tasks but they're manageable",
-          },
-          {
-            value: "rarely",
-            label: "No, rarely",
-            description: "We have few repetitive tasks",
-          },
-        ],
+        type: "checkbox",
+        validation: {
+          required: true
+        }
       },
       {
         id: "employeeTasks",
         text: "Are your employees often tied up with tasks that could be automated?",
         hint: "Think of processes that need to be done the same way every day, like processing invoices or scheduling appointments.",
-        options: [
-          {
-            value: "constantly",
-            label: "Yes, constantly",
-            description:
-              "Our team spends too much time on repetitive processes",
-          },
-          {
-            value: "sometimes",
-            label: "Sometimes",
-            description: "Some team members handle repetitive tasks",
-          },
-          {
-            value: "efficient",
-            label: "No, our processes are efficient",
-            description: "We've already optimized most routine tasks",
-          },
-        ],
+        type: "checkbox",
+        validation: {
+          required: true
+        }
       },
       {
         id: "manualErrors",
         text: "Do you frequently experience errors due to manual handling of data?",
         hint: "For instance, mistakes in data entry or miscommunication when transferring information between systems.",
-        options: [
-          {
-            value: "regularly",
-            label: "Yes, regularly",
-            description: "We often deal with data entry errors",
-          },
-          {
-            value: "occasionally",
-            label: "Occasionally",
-            description: "We have some errors but they're not critical",
-          },
-          {
-            value: "rarely",
-            label: "Rarely or never",
-            description: "We have effective quality control",
-          },
-        ],
+        type: "checkbox",
+        validation: {
+          required: true
+        }
       },
     ],
   },
@@ -232,23 +195,10 @@ export const surveyData = [
         id: "multipleSystems",
         text: "Do you use multiple software tools that don't easily share information?",
         hint: "This might be causing delays or data mismatches between departments.",
-        options: [
-          {
-            value: "yes",
-            label: "Yes, many disconnected systems",
-            description: "We use several tools that don't integrate well",
-          },
-          {
-            value: "somewhat",
-            label: "Somewhat",
-            description: "Some of our systems integrate, others don't",
-          },
-          {
-            value: "no",
-            label: "No, our systems are well-integrated",
-            description: "We have good system integration already",
-          },
-        ],
+        type: "checkbox",
+        validation: {
+          required: true
+        }
       },
       {
         id: "manualTransfer",

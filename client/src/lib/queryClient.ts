@@ -7,31 +7,48 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-export async function apiRequest<T = any>(
-  method: string,
-  url: string,
-  data?: unknown | undefined,
-  options?: { isFormData?: boolean }
-): Promise<T> {
-  // Determine if we're sending FormData
-  const isFormData = options?.isFormData || data instanceof FormData;
-  
-  // Don't set content-type for FormData (browser will set it with boundary)
-  const headers: HeadersInit = {};
-  if (!isFormData && data) {
-    headers["Content-Type"] = "application/json";
+// Define the API request function
+export const apiRequest = async <T>(
+  endpoint: string,
+  method: string = 'GET',
+  data?: any,
+  options?: {
+    isFormData?: boolean;
+    headers?: Record<string, string>;
   }
-
-  const res = await fetch(url, {
+): Promise<T> => {
+  const url = `${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+  
+  const headers: Record<string, string> = {
+    ...(options?.headers || {}),
+  };
+  
+  // Don't set Content-Type for FormData (browser will set it with boundary)
+  if (!options?.isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
+  
+  const config: RequestInit = {
     method,
     headers,
-    body: isFormData ? (data as FormData) : (data ? JSON.stringify(data) : undefined),
-    credentials: "include",
-  });
-
-  await throwIfResNotOk(res);
-  return await res.json() as T;
-}
+    credentials: 'include',
+  };
+  
+  if (data) {
+    if (method !== 'GET') {
+      config.body = options?.isFormData ? data : JSON.stringify(data);
+    }
+  }
+  
+  const response = await fetch(url, config);
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || `API request failed with status ${response.status}`);
+  }
+  
+  return await response.json();
+};
 
 type UnauthorizedBehavior = "returnNull" | "throw";
 export const getQueryFn: <T>(options: {
@@ -51,14 +68,15 @@ export const getQueryFn: <T>(options: {
     return await res.json();
   };
 
+// Set up the query client
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1,
     },
     mutations: {
       retry: false,

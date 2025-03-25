@@ -3,7 +3,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import QuestionItem from "./QuestionItem";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Check, ArrowRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, ArrowRight, X, AlertTriangle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useLocation } from "wouter";
 import {
@@ -16,6 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface SurveySectionProps {
   section: {
@@ -66,8 +67,9 @@ const SurveySection: React.FC<SurveySectionProps> = ({
   });
   const [, navigate] = useLocation();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
-  const { handleSubmit, formState, watch } = methods;
+  const { handleSubmit, formState, watch, formState: { errors } } = methods;
   const allValues = watch();
   
   // Calculate completion percentage for this section
@@ -78,8 +80,50 @@ const SurveySection: React.FC<SurveySectionProps> = ({
   const completionPercentage = Math.round((answeredQuestions / totalQuestions) * 100);
 
   const onSubmit = (data: Record<string, string>) => {
-    onSave(data);
+    setValidationError(null);
+    
+    // Check if required fields are filled
+    const requiredFields = section.questions
+      .filter(q => q.validation?.required)
+      .map(q => ({ id: q.id, text: q.text }));
+    
+    const missingFields = requiredFields.filter(field => 
+      !data[field.id] || data[field.id].trim() === ""
+    );
+    
+    if (missingFields.length > 0) {
+      setValidationError(`Please fill in all required fields before continuing.`);
+      // Scroll to the first missing field
+      const firstMissingFieldElement = document.getElementById(missingFields[0].id);
+      if (firstMissingFieldElement) {
+        firstMissingFieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+    
+    // Check for specific validations based on questions
+    // For example, if you have a website URL field
+    if (data.websiteUrl && !isValidUrl(data.websiteUrl)) {
+      setValidationError("Please enter a valid website URL.");
+      return;
+    }
+    
+    // Process data to include comments for radio questions
+    const processedData = { ...data };
+    
+    // If all validation passes
+    onSave(processedData);
     onNext();
+  };
+  
+  // Simple URL validation helper
+  const isValidUrl = (url: string) => {
+    try {
+      new URL(url);
+      return true;
+    } catch (e) {
+      return false;
+    }
   };
 
   return (
@@ -110,6 +154,13 @@ const SurveySection: React.FC<SurveySectionProps> = ({
               </p>
             </motion.div>
 
+            {validationError && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>{validationError}</AlertDescription>
+              </Alert>
+            )}
+
             <div className="space-y-10">
               {section.questions.map((question, index) => (
                 <QuestionItem
@@ -129,6 +180,15 @@ const SurveySection: React.FC<SurveySectionProps> = ({
 
           <div className="px-6 py-5 bg-neutral-50 border-t border-neutral-200">
             <div className="flex flex-col">
+              {/* Section completion indicator */}
+              <div className="mb-4">
+                <div className="flex justify-between text-xs text-neutral-500 mb-1">
+                  <span>Section completion</span>
+                  <span>{completionPercentage}%</span>
+                </div>
+                <Progress value={completionPercentage} className="h-2" />
+              </div>
+            
               <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
                 <div className="flex gap-2 w-full sm:w-auto">
                   <Button

@@ -14,6 +14,12 @@ This application provides an interactive survey to evaluate how businesses can t
 - Client-side routing with Wouter
 - Data visualization with Recharts
 - Server-side data processing and storage
+- Multi-step workflow assessment survey with various question types
+- File attachment functionality for company profiles
+- Yes/No checkboxes and additional notes for context
+- Error handling and validation for survey form inputs
+- Airtable integration for data storage
+- AI-generated analysis based on survey responses
 
 ## AI-Powered Features
 
@@ -63,6 +69,7 @@ This application provides an interactive survey to evaluate how businesses can t
 - Node.js (v16 or higher)
 - npm or yarn
 - OpenAI API key
+- An Airtable account
 
 ### Installation
 
@@ -82,6 +89,17 @@ npm install
 OPENAI_API_KEY=your_openai_api_key_here
 PORT=3000
 NODE_ENV=development
+```
+
+4. Set up your environment variables by creating a `.env` file based on `.env.example`
+```
+cp .env.example .env
+```
+
+5. Fill in your Airtable credentials in the `.env` file:
+```
+AIRTABLE_API_KEY=your_api_key_here
+AIRTABLE_BASE_ID=your_base_id_here
 ```
 
 ### Development
